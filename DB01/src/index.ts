@@ -1,10 +1,9 @@
 import * as mqtt from 'mqtt';
-import { Configuration } from './config';
-import { iMQTTPayload, is_iMQTTPayload } from './interfaces';
 import * as fs from 'fs';
 import * as path from 'path';
-import pg from 'pg';
-
+import { Configuration } from './config';
+import { iMQTTPayload } from './interfaces';
+import pg from 'pg'
 /**
  * processMessageReceived (t: string, m: Buffer)
  * 
@@ -16,15 +15,7 @@ import pg from 'pg';
 async function processMessageReceived(t: string, m: Buffer) {
     console.log(`Recv: ${m.toString()} on topic: ${t}`);
     // split payload from MQTT into separate timestamp and value
-    let payload: iMQTTPayload = JSON.parse(m.toString());
-
-    // Verify the payload structure
-    if (!is_iMQTTPayload(payload)) {
-        console.error("Invalid payload structure: ", payload);
-        return; // exit function if faulty payload
-    }
-
-    // TODO: add in PostgreSQL processing code
+    
 }
 
 /*
@@ -33,6 +24,8 @@ async function processMessageReceived(t: string, m: Buffer) {
 async function main() {
     let s: string = "Hello MQTT01";
     console.log(s);
+
+
 
     // Log current working directory and file paths
     console.log("cwd:", process.cwd());
@@ -45,6 +38,10 @@ async function main() {
     try {
         // Load configuration data from config.json
         let config = Configuration.readFileAsJSON(configFileName);
+        const dbclient = new pg.Client (config.sql_config);
+        console.log ("database client created");
+        await dbclient.connect();
+    
         console.log("MQTT Broker URL:", config.mqtt.brokerUrl);
 
         // MQTT connection setup
@@ -53,23 +50,18 @@ async function main() {
         const mqttclient: mqtt.MqttClient = await mqtt.connectAsync(url);
         console.log("mqtt connected!");
 
-        // PostgreSQL client setup
-        const dbclient = new pg.Client(config.sql_config);
-        console.log("database client created");
+        let sql_command:string = fs.readFileSync('./sql/setup_create.txt').toString();
 
-        // Make a connection to the PostgreSQL server
-        await dbclient.connect();
-        console.log("database connected!");
+        let d: Date = new Date(Date.now())
+        let ts: string = d.toISOString()
+        let deviceid: string = "test_device"
+        let metric: string = "PLCtag"
+        let value: number = 555.55
 
-        //read SQL table text file
-        let sql_command:string = 
-        fs.readFileSync('./sql/setup_create.txt').toString();
-        console.log("SQL command read!");
+        sql_command = "INSERT INTO  telemetry(timestamp, deviceid, metric, value)"+`VALUES('${ts}', '${deviceid}', '${metric}', '${value}')`
+        await dbclient.query (sql_command);
 
-        // Issue the SQL command
-        await dbclient.query(sql_command);
-        console.log("SQL command executed!");
-
+        
         // Set up the topic to subscribe to
         let topic: string = config.mqtt.organization + '/' +
                             config.mqtt.division + '/' +
@@ -82,9 +74,12 @@ async function main() {
         // Register the message event handler
         mqttclient.on('message', (topic, message) => processMessageReceived(topic, message));
 
+
+
         // Subscribe to the topic
         await mqttclient.subscribeAsync(topic);
         console.log("subscription established!");
+
 
         // set up asynchronous disconnection support via signals
         const shutdown = async () => {

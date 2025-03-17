@@ -36,10 +36,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mqtt = __importStar(require("mqtt"));
-const config_1 = require("./config");
-const interfaces_1 = require("./interfaces");
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+const config_1 = require("./config");
 const pg_1 = __importDefault(require("pg"));
 /**
  * processMessageReceived (t: string, m: Buffer)
@@ -53,13 +52,6 @@ function processMessageReceived(t, m) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(`Recv: ${m.toString()} on topic: ${t}`);
         // split payload from MQTT into separate timestamp and value
-        let payload = JSON.parse(m.toString());
-        // Verify the payload structure
-        if (!(0, interfaces_1.is_iMQTTPayload)(payload)) {
-            console.error("Invalid payload structure: ", payload);
-            return; // exit function if faulty payload
-        }
-        // TODO: add in PostgreSQL processing code
     });
 }
 /*
@@ -78,24 +70,23 @@ function main() {
         try {
             // Load configuration data from config.json
             let config = config_1.Configuration.readFileAsJSON(configFileName);
+            const dbclient = new pg_1.default.Client(config.sql_config);
+            console.log("database client created");
+            yield dbclient.connect();
             console.log("MQTT Broker URL:", config.mqtt.brokerUrl);
             // MQTT connection setup
             let url = config.mqtt.brokerUrl + ":" + config.mqtt.mqttPort;
             console.log("URL: ", url);
             const mqttclient = yield mqtt.connectAsync(url);
             console.log("mqtt connected!");
-            // PostgreSQL client setup
-            const dbclient = new pg_1.default.Client(config.sql_config);
-            console.log("database client created");
-            // Make a connection to the PostgreSQL server
-            yield dbclient.connect();
-            console.log("database connected!");
-            //read SQL table text file
             let sql_command = fs.readFileSync('./sql/setup_create.txt').toString();
-            console.log("SQL command read!");
-            // Issue the SQL command
+            let d = new Date(Date.now());
+            let ts = d.toISOString();
+            let deviceid = "test_device";
+            let metric = "PLCtag";
+            let value = 555.55;
+            sql_command = "INSERT INTO  telemetry(timestamp, deviceid, metric, value)" + `VALUES('${ts}', '${deviceid}', '${metric}', '${value}')`;
             yield dbclient.query(sql_command);
-            console.log("SQL command executed!");
             // Set up the topic to subscribe to
             let topic = config.mqtt.organization + '/' +
                 config.mqtt.division + '/' +

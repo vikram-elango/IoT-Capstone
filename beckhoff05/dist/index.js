@@ -102,7 +102,7 @@ function processReadRequest(adsclient, tags, mqttclient) {
             data = yield adsclient.readValue(tags[x]);
             console.log("data for tag:", tags[x], "is:", data.value, data.dataType.adsDataTypeStr);
             // Create the filename string
-            let filename = path.join("c:/capstone/data/", tags[x].replace(/\./g, '_') + ".json");
+            let filename = path.join("C:/Users/iot/Desktop/IoT Capstone/data", tags[x].replace(/\./g, '_') + ".json");
             // Create the data object to write to the file
             let fileData = {
                 timestamp: d.toISOString(),

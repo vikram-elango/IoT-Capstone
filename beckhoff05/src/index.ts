@@ -71,7 +71,7 @@ async function processReadRequest(adsclient: ads.Client, tags: string[], mqttcli
         console.log("data for tag:", tags[x], "is:", data.value, data.dataType.adsDataTypeStr);
 
         // Create the filename string
-        let filename: string = path.join("c:/capstone/data/", tags[x].replace(/\./g, '_') + ".json");
+        let filename: string = path.join("C:/Users/iot/Desktop/IoT Capstone/data", tags[x].replace(/\./g, '_') + ".json");
 
         // Create the data object to write to the file
         let fileData = {

@@ -1,24 +1,25 @@
 {
+   "ads": {
+   "localAmsNetId": "192.168.0.107.1.1",
+   "localAdsPort": 32707,
+   "targetAmsNetId": "10.193.21.105.1.1",
+   "targetAdsPort": 851,
+   "routerAddress": "192.168.0.210",
+   "routerTcpPort": 48898
+   }, 
    "mqtt": {
-   "brokerUrl": "mqtt://192.168.0.211",
-   "mqttPort": 1883,
-   "baseTopic": "ACADEMY08/",
-   "organization": "magna",
-   "division": "iotacademy",
-   "plant": "conestoga",
-    "area": "smart",
-    "line": "presorter",
-    "workstation": "TEAM 2 (We da Best)",
-    "type": "robot 1"
- },
+       "brokerUrl": "mqtt://192.168.0.211",
+       "mqttPort": 1883,
+       "baseTopic": "ACADEMY07/",
+       "organization": "magna",
+       "division": "iotacademy",
+       "plant": "conestoga",
+       "area": "smart",
+       "line": "presorter",
+       "workstation": "team_2",
+       "type": "robot"
 
- "ads": {
-    "localAmsNetId": "192.168.0.108.1.1",
-    "localAdsPort": 32708,
-    "targetAmsNetId": "10.193.21.105.1.1",
-    "targetAdsPort": 851,
-    "routerAddress": "192.168.0.210",
-    "routerTcpPort": 48898
-    }
-   }
-   
+       }
+      
+  }
+  
