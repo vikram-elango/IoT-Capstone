@@ -18,8 +18,8 @@ async function processMessageReceived(t: string, m: Buffer, dbc: pg.Client) {
     console.log(`Recv: ${m.toString()} on topic: ${t}`);
     // Split the topic string into its individual components
     const components: string[] = t.split('/');
-    let deviceid: string = components[0];
-    let metric: string = components[1];
+    let deviceid: string = components[6];
+    let metric: string = components[7];
     console.log(metric, 'metric')
     // Parse the message Buffer into a JSON object
     let payload: any = JSON.parse(m.toString());

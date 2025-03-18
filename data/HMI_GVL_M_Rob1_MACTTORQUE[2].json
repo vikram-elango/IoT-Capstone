@@ -1,6 +1,6 @@
 {
-  "timestamp": "2025-03-18T17:25:40.767Z",
+  "timestamp": "2025-03-18T19:31:04.631Z",
   "tag": "HMI_GVL.M.Rob1.MACTTORQUE[2]",
-  "value": -13.9,
+  "value": -13.8,
   "dataType": "ADST_REAL64"
 }
