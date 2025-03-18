@@ -1,6 +1,6 @@
 {
-  "timestamp": "2025-03-17T17:59:50.680Z",
+  "timestamp": "2025-03-18T17:25:41.767Z",
   "tag": "HMI_GVL.M.Rob1.ROBOTPOS.Y",
-  "value": -66.7572,
+  "value": 550,
   "dataType": "ADST_REAL64"
 }
