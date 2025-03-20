@@ -1,6 +1,6 @@
 {
-  "timestamp": "2025-03-18T19:31:05.642Z",
+  "timestamp": "2025-03-20T17:54:17.665Z",
   "tag": "HMI_GVL.M.RUNNING",
-  "value": false,
+  "value": true,
   "dataType": "ADST_BIT"
 }

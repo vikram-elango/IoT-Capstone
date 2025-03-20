@@ -61,7 +61,7 @@ function main() {
         if (metric) {
             queryString += ` AND metric = '${metric}'`;
         }
-        queryString += ` ORDER BY timestamp DESC LIMIT 100`;
+        queryString += ` ORDER BY timestamp DESC LIMIT ${last}`;
 
         console.log(`Query String: ${queryString}`);
 

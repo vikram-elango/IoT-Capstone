@@ -128,7 +128,7 @@ function processReadRequest(adsclient, tags, mqttclient) {
             // next, set up a payload with a timestamp and the data value
             let payload = {
                 "timestamp": d.toISOString(),
-                "value": data.value.toString()
+                "value": data.value
             };
             // and publish to the MQTT broker
             yield mqttclient.publishAsync(topic, JSON.stringify(payload));
