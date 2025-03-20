@@ -1,0 +1,56 @@
+﻿<!doctype html>
+<html>
+<head>
+    <title>Robot Dashboard</title>
+</head>
+<body>
+    <script>
+        async function getData(url) {
+            const response = await fetch(url);
+            return await response.json();
+        }
+        
+        async function updateDashboard() {
+            // Define API URLs
+            let runningUrl = "http://127.0.0.1:4000/filter?last=1&metric=HMI_GVL.M.Rob1.RUNNING";
+            let torqueUrl = "http://127.0.0.1:4000/filter?last=1&metric=HMI_GVL.M.Rob1.MACTTORQUE[1]";
+            let powerUrl = "http://127.0.0.1:4000/power?from=1970-01-01%2000:00:00.000&to=9999-12-31%2023:59:59.999";
+        
+            // Fetch data from APIs
+            let runningData = await getData(runningUrl);
+            let torqueData = await getData(torqueUrl);
+            let powerData = await getData(powerUrl);
+            console.log(powerData, 'powerdataaaaaaa')
+            // Update dashboard
+            document.getElementById("robotRunning").innerHTML = runningData[0].value;
+            document.getElementById("robotTorque").innerHTML = torqueData[0].value;
+            document.getElementById("robotPower").innerHTML = powerData[0].power;
+        
+            console.log(`Power Utilization Displayed: ${powerData[0].power} olololol`); // Debug statement
+        
+            // Update cell colors based on running status
+            document.getElementById("robotRunning").style.background = (runningData[0].value == 0) ? '#FFC0C0' : '#C0FFC0';
+        }
+        
+        // Set interval to update dashboard every second
+        setInterval(updateDashboard, 2000);
+        </script>
+        
+
+<h1>Robot Dashboard</h1>
+<table border=1 width=400>
+<tr>
+    <td width="25%">Running Status</td>
+    <td width="75%" id="robotRunning"><i>data coming</i></td>
+</tr>
+<tr>
+    <td width="25%">Torque</td>
+    <td width="75%" id="robotTorque"><i>data coming</i></td>
+</tr>
+<tr>
+    <td width="25%">Power Utilization</td>
+    <td width="75%" id="robotPower"><i>data coming</i></td>
+</tr>
+</table>
+</body>
+</html>

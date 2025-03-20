@@ -1,0 +1,236 @@
+﻿<!doctype html>
+<head>
+    <title>Simple Dashboard 3</title>
+</head>
+
+
+
+<!-- include the support code for charting -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
+
+<!-- if local, remember to download the Chart.js bundle to your local public folder
+     remove the HTML comments around the script tag, and 
+	 disable the above script command using the HTML comments approach  -->
+
+<!--
+<script src="./Chart.bundle.min.js"></script>
+-->
+
+
+<script>
+
+/*
+ * function updateXYChart(chartCanvas, numPoints, pointData, pointColour, pointLabel);
+ *
+ * This function will leverage the scatter plot chart from chart.js
+ * to plot a an x,y pair of data elements from a fetched JSON object (representing
+ * the x and y coordinates of a robot at a given instant). The first parameter is a reference
+ * to the canvas we will be updating.
+ */
+
+var testXYChart = undefined;	// global variable to track chart object creation
+
+function updateXYChart(chartCanvas, numPoints, pointData, pointColour, pointLabel)
+{
+	// set up chart configuration data
+
+	let chartConfig = [];
+
+	for (x = 0; x < numPoints; x++) {
+		chartConfig[x] = {
+			label: pointLabel[x],
+			borderColor: pointColour[x],
+			data: [pointData[x]]
+		};
+	}
+
+	try {
+		if (testXYChart == undefined) {
+			// creating chart object for first time
+
+			testXYChart = new Chart(chartCanvas, {
+				type: 'scatter',
+				data: {
+					datasets: chartConfig
+				},
+				options: {
+					animation: {
+						duration: 0
+					},
+					scales: {
+						xAxes: [{
+							ticks: {
+								beginAtZero: false,
+								stepValue:100,
+								min: -700,
+								max: 700
+							}
+						}],
+						yAxes: [{
+							ticks: {
+								beginAtZero: false,
+								stepValue:100,
+								min: -700,
+								max: 700
+							}
+						}],
+						x: {
+							type: 'linear',
+							position: 'bottom'
+						}
+					}
+				}
+			});
+		} else {
+			// updating chart object for all subsequent refreshes
+
+			testXYChart.data.datasets = chartConfig;
+			testXYChart.update();
+		}
+	} catch (e) {
+		console.log (e);
+	}
+}
+
+/*
+ * async function getData(url);
+ * 
+ * This function will make the fetch() request to the desired URL
+ * and return the JSON content from the fetch.
+ */
+
+async function getData(url)
+{
+	// get the times table we are interested in 
+	const response = await fetch(url);
+
+	//extract JSON from the http response
+	return await response.json(); 
+}
+
+
+/*
+ * async function updateDashboard();
+ *
+ * This function will be called upon during interval
+ * expiry, fetch API results and update the HTML user interface
+ * based on ids we have set up in our coding below. Here we will interface
+ * with a Chart.js scatter plot to showcase  X/Y data of
+ * a randomized robot position.
+ */
+
+async function updateDashboard()
+{
+	// set up our URL for our API - for example, design the API to 
+	// provide the latest X, Y coordinates of a specific robot
+
+	let url = "http://127.0.0.1:4000/getRobotXY/...";
+
+	// make the API request
+	// 	let jsonData = await getData(url);
+
+	// now process the returned data to set up the point we wish to plot 
+	// in the scatter graph
+
+	// simulate extracting API results with random data
+
+	let jsonData = { 
+		robot_x: Math.random() * 1200 - 600, 
+		robot_y: Math.random() * 1200 - 600, 
+		robot_z: Math.random() * 150 
+	};
+
+	let jsonData2 = { 
+		robot_x: Math.random() * 1200 - 600, 
+		robot_y: Math.random() * 1200 - 600, 
+		robot_z: Math.random() * 150 
+	};
+
+	// now let's set up the chart object
+
+	// prepare our XY data for the scatter plot of 2 points
+
+	dataForXY = { x: jsonData.robot_x, y: jsonData.robot_y };
+	dataForXY2 = { x: jsonData2.robot_x, y: jsonData2.robot_y };
+
+	// configure data for chart helper function - the parameters include:
+	//    how many lines do we want to plot (here we have 2 points)
+	//    an array of X/Y data
+	//    an array of point colours
+	//    an array of point labels (that identify the meaning of the point)
+	// You can play with this approach to set up additional points based on data
+	// from your API - for example, plot multiple robot positions
+
+	let numPoints = 2;
+	let chartLabel = [];
+	let chartColor = [];
+	let multivalueDataForChart = [];
+
+	multivalueDataForChart[0] = dataForXY;
+	chartLabel[0] = "Test of X-Y Plot";
+	chartColor[0] = "red";
+
+	multivalueDataForChart[1] = dataForXY2;
+	chartLabel[1] = "Another Test";
+	chartColor[1] = "blue";
+
+	// update the chart 
+
+	let theCanvas2 = document.getElementById("xyTest").getContext('2d');
+	updateXYChart(theCanvas2, numPoints, multivalueDataForChart, chartColor, chartLabel);
+
+	// TODO: 
+	// Can you see value in showing multiple points in a single scatter chart? 
+
+	// TODO: 
+	// Can you create additional scatter plots placed on top of additional canvases, each 
+	// showing something different? Remember, each canvas should have its own unique ID to help
+	// differentiate one chart from another.
+
+	// TODO: 
+	// Which is more effective as an information display?
+
+}
+
+/*
+ * async function main();
+ *
+ * This function will setup our support for a simple web based visualization
+ * of our PreSorter Robot system.
+ *
+ */
+
+async function main()
+{
+	setInterval (updateDashboard, 200);
+}
+
+// execute main
+
+main();
+</script>
+
+
+<!-- the user interface for our dashboard is below -->
+
+
+<body>
+
+<h1> Simple Dashboard 3 </h1>
+<p>
+This example will showcase how to display a scatter plot via a JSON object
+leveraging the chart.js and moment.js (JavaScript package can be pulled into
+your web solution via <A HREF = 
+"https://www.chartjs.org/docs/latest/getting-started/installation.html#bundled-build">
+this link</A>).
+</p>
+<p>
+The chart will appear in the canvas object shown below.
+</p>
+<br /><br />
+<canvas id="xyTest" height="120" color = "black"></canvas>
+
+</body>
+
+</html>

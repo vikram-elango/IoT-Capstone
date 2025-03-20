@@ -1,0 +1,208 @@
+<!doctype html>
+<html>
+<head>
+    <title>Robot 1 Power Dashboard</title>
+    <!-- Include Chart.js -->
+    <script src="./Chart.bundle.min.js"></script>
+    <style>
+        /* Modern table styling */
+        table {
+            width: 400px;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-family: Arial, sans-serif;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+
+        tr:hover {
+            background-color: #e9ecef;
+        }
+
+        #robotRunning, #robotTorque, #robotPower,
+        #robotX, #robotY, #robotZ {
+            font-weight: bold;
+        }
+
+        /* Chart styling */
+        #powerChart {
+            margin-bottom: 20px;
+        }
+
+        /* General body styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+        }
+
+        h1 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Robot 1 Power Dashboard with Chart.js</h1>
+
+    <!-- Modern Table for Running Status, Torque, and Power -->
+    <table>
+        <tr>
+            <th width="25%">Running Status</th>
+            <td width="75%" id="robotRunning"><i>data coming</i></td>
+        </tr>
+        <tr>
+            <th width="25%">Torque</th>
+            <td width="75%" id="robotTorque"><i>data coming</i></td>
+        </tr>
+        <tr>
+            <th width="25%">Power Utilization</th>
+            <td width="75%" id="robotPower"><i>data coming</i></td>
+        </tr>
+    </table>
+
+    <!-- Modern Table for XYZ Positions -->
+    <table>
+        <tr>
+            <th width="25%">X Position</th>
+            <td width="75%" id="robotX"><i>data coming</i></td>
+        </tr>
+        <tr>
+            <th width="25%">Y Position</th>
+            <td width="75%" id="robotY"><i>data coming</i></td>
+        </tr>
+        <tr>
+            <th width="25%">Z Position</th>
+            <td width="75%" id="robotZ"><i>data coming</i></td>
+        </tr>
+    </table>
+
+    <!-- Canvas for Chart.js -->
+    <canvas id="powerChart" width="400" height="150"></canvas>
+
+    <script>
+        // Function to fetch data from an API
+        async function getData(url) {
+            const response = await fetch(url);
+            return await response.json();
+        }
+
+        // Function to update the dashboard
+        let myChart = null; // Global variable to store the chart instance
+
+        async function updateDashboard() {
+            const runningUrl = "http://127.0.0.1:4000/filter?last=1&metric=HMI_GVL.M.Rob1.RUNNING";
+            const torqueUrl = "http://127.0.0.1:4000/filter?last=1&metric=HMI_GVL.M.Rob1.MACTTORQUE[1]";
+            const powerUrl = "http://127.0.0.1:4000/power?last=400"; // Fetch last 100 power data points
+            const xyzUrl = "http://127.0.0.1:4000/xyz"; // Fetch XYZ positions
+
+            try {
+                const runningData = await getData(runningUrl);
+                const torqueData = await getData(torqueUrl);
+                const powerData = await getData(powerUrl);
+                const xyzData = await getData(xyzUrl);
+
+                // Update dashboard table
+                document.getElementById("robotRunning").innerHTML = runningData[0].value;
+                document.getElementById("robotTorque").innerHTML = torqueData[0].value;
+                document.getElementById("robotPower").innerHTML = powerData[0].power;
+
+                // Update XYZ positions table
+                document.getElementById("robotX").innerHTML = xyzData.x;
+                document.getElementById("robotY").innerHTML = xyzData.y;
+                document.getElementById("robotZ").innerHTML = xyzData.z;
+
+                // Update cell color based on running status
+                document.getElementById("robotRunning").style.background = (runningData[0].value == 0) ? '#FFC0C0' : '#C0FFC0';
+
+                // Prepare data for the chart
+                const timestamps = powerData.map(item => new Date(item.timestamp));
+                const powerValues = powerData.map(item => item.power);
+
+                // Update the chart
+                updateChart(timestamps, powerValues);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+
+        function updateChart(timestamps, powerValues) {
+            const canvas = document.getElementById('powerChart');
+            const ctx = canvas.getContext('2d');
+
+            if (!myChart) {
+                // Create a new chart if it doesn't exist
+                myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: timestamps,
+                        datasets: [{
+                            label: 'Power Utilization (%)',
+                            backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                            borderColor: 'rgba(0, 123, 255, 1)',
+                            data: powerValues,
+                            fill: false,
+                            lineTension: 0.4
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                type: 'time',
+                                time: {
+                                    unit: 'minute', // Display minutes on the x-axis
+                                    tooltipFormat: 'll HH:mm:ss',
+                                    displayFormats: {
+                                        minute: 'HH:mm', // Format for minute unit
+                                        second: 'HH:mm:ss', // Format for second unit
+                                    }
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Time'
+                                }
+                            }],
+                            yAxes: [{
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Power Utilization (%)'
+                                }
+                            }]
+                        }
+                    }
+                });
+            } else {
+                // Update the existing chart's data
+                myChart.data.labels = timestamps;
+                myChart.data.datasets[0].data = powerValues;
+                myChart.update(); // Refresh the chart
+            }
+        }
+
+        // Set interval to update dashboard every 2 seconds
+        setInterval(updateDashboard, 2000);
+    </script>
+</body>
+</html>
